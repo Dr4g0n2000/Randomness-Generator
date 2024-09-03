@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erweiterte Gitarren-Übungs-App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Gitarren-Übungs-App</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Generator 1: Skalen -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold mb-4">Skalen Generator</h2>
+                    <div class="mb-4">
+                        <label for="interval1" class="block text-gray-700 text-sm font-bold mb-2">Intervall (Sek):</label>
+                        <input type="number" id="interval1" value="10" min="1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4 flex space-x-2">
+                        <button id="startBtn1" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Start
+                        </button>
+                        <button id="stopBtn1" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Stop
+                        </button>
+                    </div>
+                    <div id="result1" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Generator 2: Akkorde -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold mb-4">Akkord Generator</h2>
+                    <div class="mb-4">
+                        <label for="interval2" class="block text-gray-700 text-sm font-bold mb-2">Intervall (Sek):</label>
+                        <input type="number" id="interval2" value="10" min="1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4 flex space-x-2">
+                        <button id="startBtn2" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Start
+                        </button>
+                        <button id="stopBtn2" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Stop
+                        </button>
+                    </div>
+                    <div id="result2" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Generator 3: Erweiterte Skalen -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold mb-4">Erweiterte Skalen</h2>
+                    <div class="mb-4">
+                        <label for="interval3" class="block text-gray-700 text-sm font-bold mb-2">Intervall (Sek):</label>
+                        <input type="number" id="interval3" value="10" min="1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4 flex space-x-2">
+                        <button id="startBtn3" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Start
+                        </button>
+                        <button id="stopBtn3" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Stop
+                        </button>
+                    </div>
+                    <div id="result3" class="mt-4 text-lg font-bold"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const scales = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'];
+        const chords = ['Major', 'Minor', 'Dim', 'Sus2', 'Sus4', 'Maj7', 'Min7', 'HalfDim7', 'Dom7'];
+        const extendedScales = ['Natural Major', 'Melodic Minor', 'Harmonic Minor', 'Harmonic Major'];
+        const degrees = ['1', '2', '3', '4', '5', '6', '7'];
+
+        const generators = [
+            { 
+                id: 1, 
+                generate: () => `${getRandomItem(scales)} in ${getRandomItem(notes)}` 
+            },
+            { 
+                id: 2, 
+                generate: () => `${getRandomItem(notes)} ${getRandomItem(chords)}` 
+            },
+            { 
+                id: 3, 
+                generate: () => `${getRandomItem(extendedScales)} - ${getRandomItem(degrees)} - ${getRandomItem(notes)}` 
+            }
+        ];
+
+        let intervalIds = [null, null, null];
+
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Audio-Kontext und Ton-Generator erstellen
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone() {
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // 440 Hz ist A4
+            
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Lautstärke auf 10% setzen
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1); // Ton für 0.1 Sekunden spielen
+        }
+
+        function setupGenerator(genId) {
+            const startBtn = document.getElementById(`startBtn${genId}`);
+            const stopBtn = document.getElementById(`stopBtn${genId}`);
+            const intervalInput = document.getElementById(`interval${genId}`);
+
+            function generateAndDisplay() {
+                document.getElementById(`result${genId}`).textContent = generators[genId-1].generate();
+                playTone();
+            }
+
+            startBtn.addEventListener('click', function() {
+                clearInterval(intervalIds[genId-1]);
+                generateAndDisplay();
+                intervalIds[genId-1] = setInterval(generateAndDisplay, intervalInput.value * 1000);
+            });
+
+            stopBtn.addEventListener('click', function() {
+                clearInterval(intervalIds[genId-1]);
+            });
+        }
+
+        setupGenerator(1);
+        setupGenerator(2);
+        setupGenerator(3);
+    </script>
+</body>
+</html>
